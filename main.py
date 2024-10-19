@@ -3,6 +3,9 @@ import streamlit as st
 # import matplotlib.pyplot as plt
 import plotly.express as px
 from datetime import datetime
+# Plotar o gráfico das colunas selecionadas em relação à data_hora usando Plotly
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 
 def main():
@@ -40,13 +43,11 @@ def main():
     selected_columns = st.multiselect("Selecione até 3 colunas para plotar em relação a data_hora:", columns, default=columns[:3])
 
     # Selecionar intervalo de tempo em uma única linha
-    # st.write("##### Selecione o Espaço de Tempo:")
     col1, col2, col3, col4 = st.columns(4)
     start_date = col1.date_input("Data Inicial", df.index.min().date())
     start_time = col2.time_input("Hora Inicial", df.index.min().time())
     end_date = col3.date_input("Data Final", df.index.max().date())
     end_time = col4.time_input("Hora Final", df.index.max().time())
-
 
     # Combinar a data e hora para formar o datetime completo
     start_datetime = pd.Timestamp.combine(start_date, start_time)
@@ -58,9 +59,30 @@ def main():
 
     # Plotar o gráfico das colunas selecionadas em relação à data_hora usando Plotly
     if selected_columns:
-        # st.write(f"##### Gráfico de {', '.join(selected_columns)} em relação a data_hora:")
-        fig = px.line(df_filtered, x=df_filtered.index, y=selected_columns, title=f"{', '.join(selected_columns)} vs Data e Hora")
-        st.plotly_chart(fig)
+        for i, column in enumerate(selected_columns):
+            # Criar uma linha com duas colunas - uma para os inputs de limite e outra para o gráfico
+            col_limite, col_grafico = st.columns([1, 20])  # A primeira coluna ocupa 5% e a segunda 95%
+
+            with col_limite:
+                # Adicionar entradas para definir a escala de cada variável no eixo y
+                # st.write(f"Limites para {column}")
+                max_val = st.number_input(f"Máx.", value=float(df_filtered[column].max()),
+                                          key=f"max_{column}")
+                min_val = st.number_input(f"Mín.", value=float(df_filtered[column].min()),
+                                          key=f"min_{column}")
+
+
+            with col_grafico:
+                # Criar o gráfico da coluna específica e adicionar ao subplot
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(x=df_filtered.index, y=df_filtered[column], mode='lines', name=column))
+
+                # Atualizar o layout para definir o intervalo do eixo y
+                fig.update_yaxes(range=[min_val, max_val])
+                fig.update_layout(title=f"{column} vs Data e Hora", height=300)
+
+                # Plotar o gráfico no Streamlit
+                st.plotly_chart(fig)
 
     # Mostrando o DataFrame no Streamlit
     st.write("#### Dados:")
@@ -84,16 +106,18 @@ def filtrar_dados(df):
     # df = df[df['data_hora'] > '2024-09-17']
 
     # Filtrar as colunas desejadas
-    colunas = ['data_hora', 'tensao_fase_A', 'tensao_fase_B',  'tensao_fase_C', 'tensao_neutro', 'corrente_fase_A',
-               'corrente_fase_B', 'corrente_fase_C', 'corrente_neutro', 'potencia_ativa', 'potencia_reativa',
-               'tensao_excitacao', 'corrente_excitacao', 'temp_manc_rad_LA', 'temp_manc_rad_LNA', 'temp_gaxeteiro']
+    colunas = ['data_hora', 'tensao_fase_A', 'tensao_fase_B',  'tensao_fase_C', 'corrente_fase_A',
+               'corrente_fase_B', 'corrente_fase_C', 'potencia_ativa', 'potencia_reativa',
+               'tensao_excitacao', 'corrente_excitacao', 'temp_enrol_A',
+               'temp_enrol_B', 'temp_enrol_C','temp_manc_rad_LA', 'temp_manc_rad_LNA', 'temp_gaxeteiro']
     df = df[colunas]
 
     # Renomear colunas para textos apresentáveis
     df.columns = [
-        'Data e Hora', 'Tensão Fase A', 'Tensão Fase B',  'Tensão Fase C', 'Tensão Neutro',
-        'Corrente Fase A', 'Corrente Fase B', 'Corrente Fase C', 'Corrente Neutro',
+        'Data e Hora', 'Tensão Fase A', 'Tensão Fase B',  'Tensão Fase C',
+        'Corrente Fase A', 'Corrente Fase B', 'Corrente Fase C',
         'Potência Ativa', 'Potência Reativa', 'Tensão Excitação', 'Corrente Excitação',
+        'Temp. Enrol. Fase A','Temp. Enrol. Fase B','Temp. Enrol. Fase C',
         'Temp. Mancal Radial LA', 'Temp. Mancal Radial LNA', 'Temp. Gaxeteiro'
     ]
 
