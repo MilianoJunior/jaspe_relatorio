@@ -85,7 +85,7 @@ def exibir_cabecalho():
 @tempo_wrapper
 def carregar_dados():
     # Leitura do arquivo CSV diretamente da pasta
-    df = pd.read_csv("ug01_1.csv", sep=";")
+    df = pd.read_csv("ug01_2.csv", sep=",")
     df['data_hora'] = pd.to_datetime(df['data_hora'], errors='coerce')
     return df
 
@@ -193,6 +193,7 @@ def filtrar_dados(df):
                'tensao_excitacao', 'corrente_excitacao', 'temp_enrol_A',
                'temp_enrol_B', 'temp_enrol_C', 'temp_manc_rad_LA', 'temp_manc_rad_LNA', 'temp_gaxeteiro']
     df = df[colunas]
+
     df.columns = [
         'Data e Hora', 'Tensão Fase A', 'Tensão Fase B', 'Tensão Fase C',
         'Corrente Fase A', 'Corrente Fase B', 'Corrente Fase C',
@@ -200,6 +201,8 @@ def filtrar_dados(df):
         'Temp. Enrol. Fase A', 'Temp. Enrol. Fase B', 'Temp. Enrol. Fase C',
         'Temp. Mancal Radial LA', 'Temp. Mancal Radial LNA', 'Temp. Gaxeteiro'
     ]
+
+
     df.set_index('Data e Hora', inplace=True)
     df.sort_index(inplace=True)
     return df
