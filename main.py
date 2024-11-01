@@ -130,6 +130,7 @@ def carregar_dados_filtrados(df, start_datetime, end_datetime):
 @tempo_wrapper
 def mostrar_dados(df):
     # Converter o DataFrame para CSV
+    df['data_hora'] = df.index
     csv = df.to_csv(index=False)
 
     # Botão de download
@@ -166,7 +167,6 @@ def plotar_graficos(df, selected_columns):
                 fig.update_yaxes(range=[min_val, max_val])
                 fig.update_layout(title=f"{column} vs Data e Hora", height=500)
                 st.plotly_chart(fig)
-    print("\n================================")
 
 @tempo_wrapper
 def mostrar_estatisticas(df):
